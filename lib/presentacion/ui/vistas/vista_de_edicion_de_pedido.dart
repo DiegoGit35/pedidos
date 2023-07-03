@@ -1,4 +1,5 @@
 import 'package:ej_hexa/dominio/entidades.dart';
+import 'package:ej_hexa/main.dart';
 import 'package:ej_hexa/presentacion/ui/blocs/bloc_edicion_de_pedido.dart';
 import 'package:ej_hexa/presentacion/ui/vistas/dialogo_item_de_pedido.dart';
 import 'package:flutter/material.dart';
@@ -13,49 +14,77 @@ class VistaDeEdicionDePedido extends StatefulWidget {
 
 class _VistaDeEdicionDePedidoState extends State<VistaDeEdicionDePedido> {
   final int _total = 0;
-  late EdicionDePedido blocEdicionDePedido;
+  late BlocEdicionDePedido blocEdicionDePedido;
+  int indiceDeItemDePedidoSeleccionado = 0;
   @override
   Widget build(BuildContext context) {
-    blocEdicionDePedido = BlocProvider.of<EdicionDePedido>(context);
-    Future<ItemDePedido?> mostrarDialogoDeItemDePedido() async {
+    blocEdicionDePedido = BlocProvider.of<BlocEdicionDePedido>(context);
+    Future<ItemDePedido?> mostrarDialogoDeItemDePedido(
+        ItemDePedido itemDePedido) async {
       return await showDialog<ItemDePedido?>(
           context: context,
           builder: (BuildContext context) {
-            return const DialogoItemDePedido();
+            return DialogoItemDePedido(
+              itemDePedidoAEditar: itemDePedido,
+            );
           });
     }
 
     Future<void> crearItemDePedido() async {
-      ItemDePedido? itemDePedidoONada = await mostrarDialogoDeItemDePedido();
+      ItemDePedido? itemDePedidoONada = await mostrarDialogoDeItemDePedido(
+          ItemDePedido(
+              cantidad: 1,
+              comida: repositorioDePedidos.obtenerTodasLasComidas()[0]));
       if (itemDePedidoONada != null) {
         blocEdicionDePedido.agregarItemDePedido(itemDePedidoONada);
       }
     }
 
-    Future<ItemDePedido?> editarItemDePedido() async {
-      return await showDialog<ItemDePedido?>(
+    Future<void> editarItemDePedido(
+        ItemDePedido itemDepedidoSeleccionado) async {
+      ItemDePedido? itemDePedidoONada = await showDialog<ItemDePedido?>(
           context: context,
           builder: (BuildContext context) {
-            return const DialogoItemDePedido();
+            return DialogoItemDePedido(
+                itemDePedidoAEditar: itemDepedidoSeleccionado);
           });
+      if (itemDePedidoONada != null) {
+        blocEdicionDePedido.actualizarItemDePedido(itemDePedidoONada);
+      }
     }
 
     return Scaffold(
       appBar: AppBar(title: const Text('Edición de pedido')),
-      body: BlocConsumer<EdicionDePedido, EstadoDeEdicionDePedido>(
+      body: BlocConsumer<BlocEdicionDePedido, EstadoDeEdicionDePedido>(
           builder: ((context, state) {
-        state as EstadoEDPConPedidos;
+        state as EEPCreandoOEditandoPedido;
         return Column(
           children: [
             const Text("Comidas: "),
-            ListView(
-                shrinkWrap: true,
-                children: state.itemsDePedido
-                    .map((unItem) => SizedBox(
-                        height: 50, width: 200, child: Text(unItem.toString())))
-                    .toList()),
+            SizedBox(
+              height: MediaQuery.of(context).size.height * 0.5,
+              width: MediaQuery.of(context).size.width * 0.8,
+              child: ListView.builder(
+                itemBuilder: (BuildContext context, int index) {
+                  return ListTile(
+                    selected: state.itemsDePedido[index] ==
+                        context
+                            .watch<BlocEdicionDePedido>()
+                            .itemDePedidoSeleccionado,
+                    title: Text(state.itemsDePedido[index].toString()),
+                    onTap: () {
+                      setState(() {
+                        BlocProvider.of<BlocEdicionDePedido>(context)
+                            .seleccionarItemDePedido(
+                                state.itemsDePedido[index]);
+                      });
+                    },
+                  );
+                },
+                itemCount: state.itemsDePedido.length,
+              ),
+            ),
             Text('Total: $_total'),
-            const Spacer(),
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: ElevatedButton(
@@ -92,9 +121,11 @@ class _VistaDeEdicionDePedidoState extends State<VistaDeEdicionDePedido> {
       }), listener: (context, state) {
         switch (state.nombre) {
           case NombreDeEstadoDeEdicionDePedido.editandoItemDePedido:
-            editarItemDePedido();
+            state as EEPCreandoOEditandoPedido;
+            editarItemDePedido(state.itemDePedidoSeleccionado!);
             break;
           case NombreDeEstadoDeEdicionDePedido.creandoItemdePedido:
+            state as EEPCreandoOEditandoPedido;
             crearItemDePedido();
             break;
           default:

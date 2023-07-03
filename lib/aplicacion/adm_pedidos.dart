@@ -17,7 +17,7 @@ class EstadoADPInicial extends EstadoDeAdministracionDePedidos {
   final Pedido? pedidoSeleccionado;
 
   @override
-  List<Object?> get props => [NombreDeEstadoDeAdministracionDePedidos, pedidos];
+  List<Object?> get props => [nombre, pedidoSeleccionado, pedidos];
   const EstadoADPInicial(
       {required this.pedidos, required this.pedidoSeleccionado})
       : super(NombreDeEstadoDeAdministracionDePedidos.inicial);
@@ -43,14 +43,12 @@ class EstadoADPFalla extends EstadoDeAdministracionDePedidos {
 
 class AdministracionDePedidos extends Cubit<EstadoDeAdministracionDePedidos> {
   final List<Pedido> _pedidos = [];
-  Pedido? _pedidoSeleccionado;
-  // final List<ItemDePedido> _itemsDePedidoSeleccionado = [];
-  // ItemDePedido? _itemSeleccionado;
+  Pedido? pedidoSeleccionado;
 
   AdministracionDePedidos(super.initialState);
 
-  seleccionarPedido(Pedido? pedidoSeleccionado) {
-    _pedidoSeleccionado = pedidoSeleccionado;
+  seleccionarPedido(Pedido? nuevoPedidoSeleccionado) {
+    pedidoSeleccionado = pedidoSeleccionado;
   }
 
   comenzarCreacionDePedido() {
@@ -60,18 +58,18 @@ class AdministracionDePedidos extends Cubit<EstadoDeAdministracionDePedidos> {
   }
 
   agregarNuevoPedido(Pedido nuevoPedido) {
-    _pedidoSeleccionado = nuevoPedido;
+    pedidoSeleccionado = nuevoPedido;
     repositorioDePedidos.guardarPedido(nuevoPedido);
     emit(EstadoADPEditandoPedido(pedido: nuevoPedido));
   }
 
   comenzarEdicionDePedidoSeleccionado() {
-    if (_pedidoSeleccionado == null) {
+    if (pedidoSeleccionado == null) {
       emit(const EstadoADPFalla(
           mensajeDeError: 'Es necesario que selecciones el pedido a editar'));
       emit(EstadoADPInicial(pedidos: _pedidos, pedidoSeleccionado: null));
     } else {
-      emit(EstadoADPEditandoPedido(pedido: _pedidoSeleccionado!));
+      emit(EstadoADPEditandoPedido(pedido: pedidoSeleccionado!));
     }
   }
 }

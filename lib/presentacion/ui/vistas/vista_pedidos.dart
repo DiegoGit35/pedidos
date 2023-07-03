@@ -1,7 +1,6 @@
 import 'package:ej_hexa/aplicacion/adm_pedidos.dart';
 import 'package:ej_hexa/main.dart';
-import 'package:ej_hexa/presentacion/ui/blocs/bloc_edicion_de_pedido.dart';
-import 'package:ej_hexa/presentacion/ui/vistas/vista_de_edicion_de_pedido.dart';
+import 'package:ej_hexa/presentacion/routes.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -35,10 +34,8 @@ class VistaPedidos extends StatelessWidget {
                                 NombreDeEstadoDeAdministracionDePedidos.inicial
                             ? (state as EstadoADPInicial)
                                 .pedidos
-                                .map((unPedido) => SizedBox(
-                                    height: 50,
-                                    width: 200,
-                                    child: Text(unPedido.toString())))
+                                .map((unPedido) =>
+                                    ListTile(title: Text(unPedido.toString())))
                                 .toList()
                             : []),
                     const Spacer(),
@@ -78,17 +75,9 @@ class VistaPedidos extends StatelessWidget {
             listener: (context, state) {
               if (state.nombre ==
                   NombreDeEstadoDeAdministracionDePedidos.editandoPedido) {
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (builderContext) =>
-                            BlocProvider<EdicionDePedido>(
-                                create: (context) => EdicionDePedido(
-                                    const EstadoEDPConPedidos(
-                                        NombreDeEstadoDeEdicionDePedido.inicial,
-                                        itemsDePedido: [],
-                                        itemDePedidoSeleccionado: null)),
-                                child: const VistaDeEdicionDePedido())));
+                state as EstadoADPEditandoPedido;
+                pedidosRouter.pushNamed(NombreDeVista.edicionDePedidos.name,
+                    extra: state.pedido);
               } else if (state.nombre ==
                   NombreDeEstadoDeAdministracionDePedidos.falla) {
                 ScaffoldMessenger.of(context).showSnackBar(SnackBar(

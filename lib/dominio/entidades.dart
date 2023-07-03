@@ -27,6 +27,14 @@ class ItemDePedido {
   String toString() {
     return "$cantidad - ${comida.nombre} - $totalItem";
   }
+
+  @override
+  bool operator ==(Object other) {
+    return (other is ItemDePedido && comida == other.comida);
+  }
+
+  @override
+  int get hashCode => comida.hashCode;
 }
 
 class Pedido {

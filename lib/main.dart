@@ -1,9 +1,8 @@
 import 'package:ej_hexa/aplicacion/adm_pedidos.dart';
 import 'package:ej_hexa/datos/adaptadores_de_repositorios.dart';
 import 'package:ej_hexa/dominio/repositorios.dart';
-import 'package:ej_hexa/presentacion/ui/vistas/vista_pedidos.dart';
+import 'package:ej_hexa/presentacion/routes.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 
 // Definir adaptadores de repositorios
 RepositorioDePedidos repositorioDePedidos =
@@ -30,9 +29,39 @@ class AdministracionDePedidosApp extends StatelessWidget {
 // o un BlocConsumer
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-        home: BlocProvider<AdministracionDePedidos>(
-            create: (context) => blocAdministracionDePedidos,
-            child: const VistaPedidos()));
+    return MaterialApp.router(
+        title: 'Frutality',
+        // theme: Theme.of(context).copyWith(
+        //     textTheme: const TextTheme(
+        //       displayMedium: TextStyle(
+        //           fontFamily: 'AmaticSC',
+        //           color: Colors.black,
+        //           fontSize: 28,
+        //           fontStyle: FontStyle.normal,
+        //           fontWeight: FontWeight.bold),
+        //       displayLarge: TextStyle(
+        //           fontFamily: 'AmaticSC',
+        //           color: Colors.black,
+        //           fontSize: 42,
+        //           fontStyle: FontStyle.normal,
+        //           fontWeight: FontWeight.bold),
+        //     ),
+        //     elevatedButtonTheme: const ElevatedButtonThemeData(
+        //         style: ButtonStyle(
+        //             textStyle: MaterialStatePropertyAll(TextStyle(
+        //                 color: Colors.black,
+        //                 fontSize: 36,
+        //                 fontWeight: FontWeight.w700,
+        //                 fontFamily: 'AmaticSC')),
+        //             backgroundColor:
+        //                 MaterialStatePropertyAll(Colors.lightGreen),
+        //             // overlayColor: MaterialStatePropertyAll(Colors.lightGreen),
+        //             // shadowColor: MaterialStatePropertyAll(Colors.transparent),
+        //             foregroundColor: MaterialStatePropertyAll(Colors.blue)))
+
+        //     // primarySwatch: Colors.amber,
+        //     // primarySwatch: Colors.transparent.withOpacity(opacity),
+        //     ),
+        routerConfig: pedidosRouter);
   }
 }

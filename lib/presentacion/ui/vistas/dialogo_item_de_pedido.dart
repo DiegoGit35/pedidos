@@ -3,17 +3,16 @@ import 'package:ej_hexa/main.dart';
 import 'package:flutter/material.dart';
 
 class DialogoItemDePedido extends StatefulWidget {
-  const DialogoItemDePedido({super.key});
+  final ItemDePedido itemDePedidoAEditar;
+  const DialogoItemDePedido({required this.itemDePedidoAEditar, super.key});
 
   @override
   State<DialogoItemDePedido> createState() => _DialogoItemDePedidoState();
 }
 
 class _DialogoItemDePedidoState extends State<DialogoItemDePedido> {
-  int cantidad = 1;
-  Comida? comidaSeleccionada;
   List<Comida> todasLasComidas = repositorioDePedidos.obtenerTodasLasComidas();
-
+  _DialogoItemDePedidoState();
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
@@ -23,8 +22,11 @@ class _DialogoItemDePedidoState extends State<DialogoItemDePedido> {
           width: 500,
           child: Column(children: [
             TextField(
+              controller: TextEditingController.fromValue(TextEditingValue(
+                  text: widget.itemDePedidoAEditar.cantidad.toString())),
               decoration: const InputDecoration(hintText: 'Cantidad'),
-              onChanged: (value) => cantidad = int.parse(value),
+              onChanged: (value) =>
+                  widget.itemDePedidoAEditar.cantidad = int.parse(value),
             ),
             DropdownButtonFormField<Comida>(
                 isExpanded: true,
@@ -35,35 +37,20 @@ class _DialogoItemDePedidoState extends State<DialogoItemDePedido> {
                           unaComida.nombre,
                         )))
                     .toList(),
-                value: comidaSeleccionada,
+                value: widget.itemDePedidoAEditar.comida,
                 onChanged: (unaComida) => {
-                      // print(_comidaSeleccionadoString)
-                      // _comidaSeleccionado = value
-                      setState(() =>
-                              //   print(value!.nombre);
-                              comidaSeleccionada = unaComida
-                          //   _comidaSeleccionado = value;
-                          )
+                      if (unaComida != null)
+                        {
+                          setState(() =>
+                              widget.itemDePedidoAEditar.comida = unaComida)
+                        },
                     }),
             const Spacer(),
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: ElevatedButton(
-                  onPressed: () => {
-                        if (comidaSeleccionada == null)
-                          {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                    content:
-                                        Text('Debes seleccionar una comida')))
-                          }
-                        else
-                          {
-                            Navigator.of(context).pop(ItemDePedido(
-                                cantidad: cantidad,
-                                comida: comidaSeleccionada!))
-                          },
-                      },
+                  onPressed: () =>
+                      {Navigator.of(context).pop(widget.itemDePedidoAEditar)},
                   child: const SizedBox(
                     height: 50,
                     width: double.infinity,
@@ -73,7 +60,7 @@ class _DialogoItemDePedidoState extends State<DialogoItemDePedido> {
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: ElevatedButton(
-                  onPressed: () => {Navigator.of(context).pop()},
+                  onPressed: () => {Navigator.of(context).pop(Null)},
                   child: const SizedBox(
                     height: 50,
                     width: double.infinity,

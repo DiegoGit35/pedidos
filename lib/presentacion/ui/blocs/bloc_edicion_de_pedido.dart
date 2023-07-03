@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
 
 enum NombreDeEstadoDeEdicionDePedido {
-  inicial,
+  mostrandoPedido,
   falla,
   editandoItemDePedido,
   creandoItemdePedido
@@ -16,71 +16,84 @@ abstract class EstadoDeEdicionDePedido extends Equatable {
   const EstadoDeEdicionDePedido(this.nombre);
 }
 
-class EstadoEDPConPedidos extends EstadoDeEdicionDePedido {
-  final List<ItemDePedido> itemsDePedido;
-  final ItemDePedido? itemDePedidoSeleccionado;
-  @override
-  List<Object?> get props => [nombre, itemsDePedido, itemDePedidoSeleccionado];
-  const EstadoEDPConPedidos(
-    NombreDeEstadoDeEdicionDePedido nombre, {
-    required this.itemsDePedido,
-    required this.itemDePedidoSeleccionado,
-  }) : super(nombre);
-}
-
-class EstadoEDPFalla extends EstadoDeEdicionDePedido {
+class EEPMostrandoFalla extends EstadoDeEdicionDePedido {
   final String mensajeDeError;
-  const EstadoEDPFalla({required this.mensajeDeError})
+  const EEPMostrandoFalla({required this.mensajeDeError})
       : super(NombreDeEstadoDeEdicionDePedido.falla);
 
   @override
   List<Object?> get props => [nombre, mensajeDeError];
 }
 
-class EdicionDePedido extends Cubit<EstadoDeEdicionDePedido> {
-  final List<ItemDePedido> _itemsDePedido = [];
-  ItemDePedido? _itemDePedidoSeleccionado;
-  EdicionDePedido(super.initialState);
+class EEPCreandoOEditandoPedido extends EstadoDeEdicionDePedido {
+  final List<ItemDePedido> itemsDePedido;
+  final ItemDePedido? itemDePedidoSeleccionado;
 
-  seleccionarItemDePedido(ItemDePedido itemDePedidoSeleccionado) {
-    _itemDePedidoSeleccionado = itemDePedidoSeleccionado;
+  const EEPCreandoOEditandoPedido(
+      {required NombreDeEstadoDeEdicionDePedido estado,
+      required this.itemsDePedido,
+      this.itemDePedidoSeleccionado})
+      : super(estado);
+  @override
+  List<Object?> get props => [nombre, itemsDePedido, itemDePedidoSeleccionado];
+}
+
+class BlocEdicionDePedido extends Cubit<EstadoDeEdicionDePedido> {
+  Pedido pedido;
+  ItemDePedido? itemDePedidoSeleccionado;
+
+  BlocEdicionDePedido({required this.pedido})
+      : super(EEPCreandoOEditandoPedido(
+            estado: NombreDeEstadoDeEdicionDePedido.mostrandoPedido,
+            itemsDePedido: pedido.items));
+
+  seleccionarItemDePedido(ItemDePedido nuevoItemDePedidoSeleccionado) {
+    itemDePedidoSeleccionado = nuevoItemDePedidoSeleccionado;
+
+    EEPCreandoOEditandoPedido(
+        itemDePedidoSeleccionado: itemDePedidoSeleccionado,
+        estado: NombreDeEstadoDeEdicionDePedido.mostrandoPedido,
+        itemsDePedido: pedido.items);
   }
 
   comenzandoACrearItemDePedido() {
-    emit(EstadoEDPConPedidos(
-        NombreDeEstadoDeEdicionDePedido.creandoItemdePedido,
-        itemsDePedido: _itemsDePedido,
-        itemDePedidoSeleccionado: _itemDePedidoSeleccionado));
+    emit(EEPCreandoOEditandoPedido(
+        estado: NombreDeEstadoDeEdicionDePedido.creandoItemdePedido,
+        itemsDePedido: pedido.items,
+        itemDePedidoSeleccionado: itemDePedidoSeleccionado));
   }
 
   agregarItemDePedido(ItemDePedido nuevoItemDePedido) {
-    _itemsDePedido.add(nuevoItemDePedido);
-    emit(EstadoEDPConPedidos(NombreDeEstadoDeEdicionDePedido.inicial,
-        itemsDePedido: _itemsDePedido,
+    pedido.items.add(nuevoItemDePedido);
+    emit(EEPCreandoOEditandoPedido(
+        estado: NombreDeEstadoDeEdicionDePedido.mostrandoPedido,
+        itemsDePedido: pedido.items,
         itemDePedidoSeleccionado: nuevoItemDePedido));
   }
 
   actualizarItemDePedido(ItemDePedido itemDePedidoActualizado) {
-    _itemDePedidoSeleccionado!.cantidad = itemDePedidoActualizado.cantidad;
-    _itemDePedidoSeleccionado!.comida = itemDePedidoActualizado.comida;
+    itemDePedidoSeleccionado!.cantidad = itemDePedidoActualizado.cantidad;
+    itemDePedidoSeleccionado!.comida = itemDePedidoActualizado.comida;
 
-    emit(EstadoEDPConPedidos(NombreDeEstadoDeEdicionDePedido.inicial,
-        itemDePedidoSeleccionado: _itemDePedidoSeleccionado,
-        itemsDePedido: _itemsDePedido));
+    emit(EEPCreandoOEditandoPedido(
+        estado: NombreDeEstadoDeEdicionDePedido.mostrandoPedido,
+        itemDePedidoSeleccionado: itemDePedidoSeleccionado,
+        itemsDePedido: pedido.items));
   }
 
   comenzarEditarItemDePedidoSeleccionado() {
-    if (_itemDePedidoSeleccionado == null) {
-      emit(const EstadoEDPFalla(
+    if (itemDePedidoSeleccionado == null) {
+      emit(const EEPMostrandoFalla(
           mensajeDeError: 'Es necesario que selecciones el pedido a editar'));
-      emit(EstadoEDPConPedidos(NombreDeEstadoDeEdicionDePedido.inicial,
-          itemsDePedido: _itemsDePedido,
-          itemDePedidoSeleccionado: _itemDePedidoSeleccionado));
+      emit(EEPCreandoOEditandoPedido(
+          estado: NombreDeEstadoDeEdicionDePedido.mostrandoPedido,
+          itemsDePedido: pedido.items,
+          itemDePedidoSeleccionado: itemDePedidoSeleccionado));
     } else {
-      emit(EstadoEDPConPedidos(
-          NombreDeEstadoDeEdicionDePedido.editandoItemDePedido,
-          itemDePedidoSeleccionado: _itemDePedidoSeleccionado,
-          itemsDePedido: _itemsDePedido));
+      emit(EEPCreandoOEditandoPedido(
+          estado: NombreDeEstadoDeEdicionDePedido.editandoItemDePedido,
+          itemDePedidoSeleccionado: itemDePedidoSeleccionado,
+          itemsDePedido: pedido.items));
     }
   }
 }
