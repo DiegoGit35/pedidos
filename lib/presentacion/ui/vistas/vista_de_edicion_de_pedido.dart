@@ -88,15 +88,16 @@ class _VistaDeEdicionDePedidoState extends State<VistaDeEdicionDePedido> {
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: ElevatedButton(
-                  onPressed: context
-                              .watch<BlocEdicionDePedido>()
-                              .pedido
-                              .getTotal() ==
-                          0
-                      ? blocEdicionDePedido
-                          .comenzarEditarItemDePedidoSeleccionado
-                      : () =>
-                          ScaffoldMessenger.of(context).showSnackBar(snackBar),
+                  onPressed: blocEdicionDePedido.itemDePedidoSeleccionado ==
+                          null
+                      ? () {
+                          const snackBar = SnackBar(
+                            content: Text('No hay un pedido seleccionado!'),
+                          );
+                          ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                        }
+                      : blocEdicionDePedido
+                          .comenzarEditarItemDePedidoSeleccionado,
                   child: const SizedBox(
                       height: 50,
                       width: double.infinity,
@@ -141,7 +142,3 @@ class _VistaDeEdicionDePedidoState extends State<VistaDeEdicionDePedido> {
     );
   }
 }
-
-const snackBar = SnackBar(
-  content: Text('No hay un pedido seleccionado!'),
-);
