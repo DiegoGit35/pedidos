@@ -47,6 +47,14 @@ class Pedido {
     items.add(ItemDePedido(cantidad: cantidad, comida: comida));
   }
 
+  double getTotal() {
+    double total = 0;
+    for (var element in items) {
+      total += element.totalItem;
+    }
+    return total;
+  }
+
   bool contieneComida(Comida unaComida) {
     return items.any((item) => item.comida == unaComida);
   }

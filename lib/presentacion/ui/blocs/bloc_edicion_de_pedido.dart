@@ -96,4 +96,6 @@ class BlocEdicionDePedido extends Cubit<EstadoDeEdicionDePedido> {
           itemsDePedido: pedido.items));
     }
   }
+
+  lanzarSnackbar() {}
 }

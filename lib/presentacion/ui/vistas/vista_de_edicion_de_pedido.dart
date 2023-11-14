@@ -13,7 +13,6 @@ class VistaDeEdicionDePedido extends StatefulWidget {
 }
 
 class _VistaDeEdicionDePedidoState extends State<VistaDeEdicionDePedido> {
-  final int _total = 0;
   late BlocEdicionDePedido blocEdicionDePedido;
   int indiceDeItemDePedidoSeleccionado = 0;
   @override
@@ -84,12 +83,20 @@ class _VistaDeEdicionDePedidoState extends State<VistaDeEdicionDePedido> {
                 itemCount: state.itemsDePedido.length,
               ),
             ),
-            Text('Total: $_total'),
+            Text(
+                'Total:${context.watch<BlocEdicionDePedido>().pedido.getTotal()}'),
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: ElevatedButton(
-                  onPressed: blocEdicionDePedido
-                      .comenzarEditarItemDePedidoSeleccionado,
+                  onPressed: context
+                              .watch<BlocEdicionDePedido>()
+                              .pedido
+                              .getTotal() ==
+                          0
+                      ? blocEdicionDePedido
+                          .comenzarEditarItemDePedidoSeleccionado
+                      : () =>
+                          ScaffoldMessenger.of(context).showSnackBar(snackBar),
                   child: const SizedBox(
                       height: 50,
                       width: double.infinity,
@@ -134,3 +141,7 @@ class _VistaDeEdicionDePedidoState extends State<VistaDeEdicionDePedido> {
     );
   }
 }
+
+const snackBar = SnackBar(
+  content: Text('No hay un pedido seleccionado!'),
+);

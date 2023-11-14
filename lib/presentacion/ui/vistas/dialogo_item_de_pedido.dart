@@ -60,7 +60,9 @@ class _DialogoItemDePedidoState extends State<DialogoItemDePedido> {
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: ElevatedButton(
-                  onPressed: () => {Navigator.of(context).pop(Null)},
+                  onPressed: () {
+                    Navigator.of(context).pop(null);
+                  },
                   child: const SizedBox(
                     height: 50,
                     width: double.infinity,
